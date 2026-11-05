@@ -223,6 +223,7 @@ npm run dev -- --host 0.0.0.0
 #   Network: http://&lt;instructor-lan-ip&gt;:5173/</code></pre>
   <p class="sub">For a real class: share the <strong>Network</strong> URL, have each student add the custom network (chain id <code>31337</code>) and import one disposable Hardhat private key into MetaMask, per README §5. For instructor dry-runs and this guide's screenshots, see <a href="#validate">§5 Validate</a> instead — it drives the same real UI without needing MetaMask installed.</p>
   <div class="callout warn">Never expose port <code>8545</code> beyond the classroom LAN, and never reuse these well-known disposable keys for anything real — see <a href="#limitations">Design limitations</a>.</div>
+  <div class="callout">Every command on this page is plain <code>npm</code>/<code>npx</code> syntax and runs the same on macOS as on Windows. The two steps that genuinely differ by OS — the firewall permission prompt, and the command to find your LAN IP (<code>ipconfig</code> on Windows vs. <code>ipconfig getifaddr en0</code> on macOS) — are covered in <b>README.md → macOS instructor setup</b>. That section is a direct translation of the Windows steps and hasn't been independently re-run end-to-end on an actual Mac the way the rest of this guide has.</div>
 </section>
 
 <section class="block" id="test">
