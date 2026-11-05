@@ -1,4 +1,4 @@
-# PropChain Classroom — Windows Shared Blockchain Lab
+# PropChain Classroom — Shared Blockchain Lab (Windows + macOS)
 
 A classroom-only educational demo of fractional real-estate tokenization using:
 - React + Vite
@@ -21,22 +21,30 @@ This is a LAN classroom setup, not an internet-hosted production service.
 
 ## Prerequisites
 
-Instructor laptop:
-- Windows 10/11, 16 GB RAM recommended (8 GB can work)
-- Node.js LTS (Node 20 recommended)
+Instructor laptop (Windows 10/11 **or** macOS):
+- 16 GB RAM recommended (8 GB can work)
+- Node.js LTS (Node 20 recommended; this repo's own Windows validation pass used Node 22.19.0 / npm 11.6.0 successfully)
 - VS Code
-- Chrome or Edge
+- Chrome, Edge, Brave, or Firefox — **not Safari**, which MetaMask doesn't support
 - MetaMask extension
-- Windows Firewall permission for Node.js on the Private network
+- Firewall permission for Node.js to accept incoming connections (Windows Firewall on Windows; macOS's Application Firewall on a Mac — see [macOS instructor setup](#macos-instructor-setup))
 
-Student laptops:
-- Chrome or Edge + MetaMask
+Student laptops (either OS):
+- Chrome, Edge, Brave, or Firefox + MetaMask
 - Access to the same classroom LAN/Wi-Fi
 - No Node.js installation required when using the shared instructor-hosted web app
 
 ## 1. Install and prepare (instructor laptop)
 
-Open PowerShell:
+Windows instructions follow immediately below and are what this repo's
+own end-to-end validation (section 8) actually ran against. **macOS
+instructors:** every `npm`/`npx` command is identical on macOS — only the
+shell, paths, and two OS-level steps (firewall prompt, finding your LAN
+IP) differ. Skip ahead to [macOS instructor setup](#macos-instructor-setup)
+for the Terminal equivalents, then come back to sections 5–9, which are
+identical on both OSes.
+
+Open PowerShell (Windows):
 
 ```powershell
 cd C:\dev
@@ -129,6 +137,91 @@ For an instructor demo, use Hardhat account #0 (the deployer). Student accounts 
 - The MetaMask RPC URL must use the instructor LAN IP, not `localhost`.
 - If your browser or MetaMask refuses an insecure HTTP RPC endpoint, use a trusted HTTPS reverse proxy on the LAN or run the exercise on each student's own laptop. Do not expose port 8545 to the public internet.
 - Do not port-forward these ports on a home/router firewall.
+
+## macOS instructor setup
+
+Everything in sections 2–9 above (npm scripts, MetaMask config, student
+workflow, reset, validate, project structure) is identical on macOS — only
+the shell, file paths, and two OS-level steps (firewall prompt wording,
+finding your LAN IP) differ from the Windows/PowerShell instructions in
+section 1. This section has **not** been run end-to-end on an actual Mac
+in this repo's own validation pass (section 8 was verified on Windows) —
+treat it as a direct, faithful translation of the verified Windows steps
+rather than independently re-verified.
+
+**Prerequisites (instructor Mac):**
+- macOS with Terminal (or iTerm2)
+- Node.js LTS (Node 20+; this repo's Windows pass used Node 22.19.0/npm
+  11.6.0 successfully, so a recent Node 20+ install is expected to work
+  the same way)
+- Chrome, Edge, Brave, or Firefox + the MetaMask extension — **MetaMask
+  does not support Safari**, so Safari isn't an option for either the
+  instructor or students
+- VS Code (optional, same as Windows)
+
+**1. Install and prepare**
+
+```bash
+cd ~/dev
+# Extract this ZIP (or git clone) so the project folder is ~/dev/propchain-classroom
+cd ~/dev/propchain-classroom
+node --version
+npm --version
+
+cd blockchain
+npm install
+```
+
+**2. Start the shared blockchain** (Terminal window 1)
+
+```bash
+cd ~/dev/propchain-classroom/blockchain
+npm run node:shared
+```
+
+The first time this binds a port and accepts network connections, macOS's
+Application Firewall may show a prompt like *"Do you want the application
+'node' to accept incoming network connections?"* — click **Allow**. (If
+you don't see a prompt and students can't reach you, check **System
+Settings → Network → Firewall → Options** and allow incoming connections
+for `node`.)
+
+**3. Deploy demo contracts** (Terminal window 2)
+
+```bash
+cd ~/dev/propchain-classroom/blockchain
+npm run deploy:shared
+```
+
+**4. Start the classroom web app** (Terminal window 3)
+
+```bash
+cd ~/dev/propchain-classroom/frontend
+npm install
+npm run dev -- --host 0.0.0.0
+```
+
+Find your Mac's LAN IP to share with students (pick whichever interface
+you're actually connected through — Wi-Fi is usually `en0`):
+
+```bash
+ipconfig getifaddr en0   # Wi-Fi, on most Macs
+ipconfig getifaddr en1   # try this if en0 returns nothing
+# or, to see every interface at once:
+ifconfig | grep "inet " | grep -v 127.0.0.1
+```
+
+**5. Configure MetaMask on every student laptop** — identical to the
+Windows instructions in section 5 above (the browser extension behaves
+the same regardless of OS): same network name, RPC URL using *your* Mac's
+LAN IP, chain ID `31337`, and the same disposable Hardhat test accounts.
+
+**Network troubleshooting, macOS-specific:**
+- The firewall prompt is macOS's Application Firewall, not Windows
+  Firewall — see step 2 above if you missed the prompt.
+- Still confirm everyone (instructor Mac + every student laptop,
+  Mac or Windows) is on the same LAN/Wi-Fi, exactly as in the Windows
+  troubleshooting notes in section 5.
 
 ## 6. Student workflow
 
