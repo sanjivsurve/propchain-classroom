@@ -1,0 +1,12 @@
+{
+  "name": "propchain-classroom-validation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Instructor dry-run: drives the real PropChain Classroom UI end-to-end against the local Hardhat chain and saves reference screenshots. Not used by students; not part of the classroom app itself.",
+  "scripts": {
+    "validate": "node validate.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.1"
+  }
+}

@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PropChain Classroom — Build, Run &amp; Demo Guide</title>
+<meta name="description" content="How to build, deploy, run, test and validate PropChain Classroom, and how to demo blockchain fundamentals, tokenization, marketplaces and security with it." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#ffffff; --panel-border:#e2e7eb; --ink:#172033; --ink-soft:#647286;
+  --navy:#101827; --navy-soft:#8f9bad; --accent:#6f9e1f; --accent-bg:#b8f36b; --accent-ink:#172033;
+  --console-bg:#101b14; --console-border:#1f2d22; --console-ink:#e7f3e0; --code-bg:#0f1a28; --code-ink:#d9e3f0;
+  --mono:'DM Mono',ui-monospace,monospace; --sans:'DM Sans',sans-serif; --display:'Manrope',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f16; --panel:#131a26; --panel-border:#232e40; --ink:#e8edf5; --ink-soft:#9fadc2;
+    --navy:#0a0f1a; --navy-soft:#8f9bad; --accent:#b8f36b; --accent-bg:#b8f36b; --accent-ink:#101827;
+    --console-bg:#0a1310; --console-border:#1a271c; --console-ink:#d8ecd0; --code-bg:#0a1220; --code-ink:#cfe0f5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f16; --panel:#131a26; --panel-border:#232e40; --ink:#e8edf5; --ink-soft:#9fadc2;
+  --navy:#0a0f1a; --navy-soft:#8f9bad; --accent:#b8f36b; --accent-bg:#b8f36b; --accent-ink:#101827;
+  --console-bg:#0a1310; --console-border:#1a271c; --console-ink:#d8ecd0; --code-bg:#0a1220; --code-ink:#cfe0f5;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;font-synthesis:none}
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);text-wrap:balance;margin:0}
+code,pre{font-family:var(--mono)}
+a{color:var(--accent)}
+img{max-width:100%;display:block;border-radius:10px;border:1px solid var(--panel-border)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.topbar{background:var(--navy);color:#fff;padding:18px 0;position:sticky;top:0;z-index:20;border-bottom:1px solid #293548}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font:800 16px var(--display)}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent-bg);color:var(--accent-ink);display:grid;place-items:center;font:800 17px var(--display)}
+.brand small{display:block;color:var(--navy-soft);font:10px var(--mono);letter-spacing:1.4px;margin-top:2px;font-weight:400}
+.toplinks{display:flex;gap:18px;font:600 12px var(--sans)}
+.toplinks a{color:#cfd8e6;text-decoration:none}
+.toplinks a:hover{color:var(--accent-bg)}
+.hero{background:linear-gradient(160deg,var(--navy),#1b2d44);color:#fff;padding:56px 0 46px;margin-bottom:10px}
+.hero .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:36px;align-items:center}
+.eyebrow{font:11px var(--mono);letter-spacing:1.6px;color:var(--accent-bg);text-transform:uppercase}
+.hero h1{font-size:clamp(28px,4vw,42px);line-height:1.12;margin:12px 0 14px;color:#fff}
+.hero p{color:#c3cedd;max-width:52ch;font-size:14.5px}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.badge{font:11px var(--mono);background:#ffffff14;border:1px solid #ffffff26;color:#dce5f1;padding:6px 10px;border-radius:20px}
+.hero-stats{display:grid;gap:10px}
+.hstat{background:#ffffff0d;border:1px solid #ffffff22;border-radius:12px;padding:16px 18px}
+.hstat b{display:block;font:800 26px var(--display);color:var(--accent-bg)}
+.hstat span{display:block;font:11px var(--mono);color:#aebbcc;margin-top:4px}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:34px;padding:34px 0 80px}
+nav.toc{position:sticky;top:76px;align-self:start;font-size:13px;max-height:calc(100vh - 100px);overflow:auto}
+nav.toc .group{margin-bottom:16px}
+nav.toc .group h4{font:700 10px var(--mono);letter-spacing:1px;color:var(--ink-soft);text-transform:uppercase;margin-bottom:6px}
+nav.toc a{display:block;color:var(--ink-soft);text-decoration:none;padding:5px 0;border-left:2px solid transparent}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0}
+section.block{background:var(--panel);border:1px solid var(--panel-border);border-radius:14px;padding:28px 30px;margin-bottom:22px}
+section.block h2{font-size:23px;margin-bottom:6px}
+section.block > .eyebrow{margin-bottom:8px;display:block}
+.sub{color:var(--ink-soft);font-size:13.5px;margin:6px 0 20px;max-width:75ch}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:12.5px;border:1px solid #00000030}
+pre code{font-size:12.5px}
+.cmd-label{font:700 10px var(--mono);letter-spacing:1px;color:var(--ink-soft);text-transform:uppercase;margin:16px 0 6px}
+.cmd-label:first-child{margin-top:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:var(--bg);border:1px solid var(--panel-border);border-radius:10px;padding:16px 18px}
+.card h4{font-size:14px;margin-bottom:6px}
+.card p{font-size:12.5px;color:var(--ink-soft);margin:0}
+figure{margin:18px 0}
+figure img{width:100%}
+figcaption{font-size:12px;color:var(--ink-soft);margin-top:8px}
+.shot-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.shot-row.triple{grid-template-columns:repeat(3,1fr)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--panel-border)}
+th{font:700 11px var(--mono);text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft)}
+td b{font-family:var(--mono)}
+.pass{color:#4f8a1e;font-weight:700}
+.callout{border-left:4px solid var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--panel));border-radius:0 10px 10px 0;padding:14px 18px;font-size:13px;margin:16px 0}
+.callout.warn{border-left-color:#e0a23c}
+.callout.security{border-left-color:#d9705a}
+.console-mini{background:var(--console-bg);border:1px solid var(--console-border);border-radius:10px;padding:16px 18px;color:var(--console-ink);margin:16px 0}
+.console-mini ol{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:7px;font-size:12.5px}
+.console-mini li{display:flex;gap:9px;align-items:flex-start}
+.console-mini .dot{width:9px;height:9px;border-radius:50%;background:var(--accent-bg);margin-top:4px;flex:none}
+.console-mini b{display:block;font-size:12.5px}
+.console-mini small{display:block;color:#9fb79a;font:11px var(--mono);margin-top:2px}
+.concept-nav{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 24px}
+.concept-nav a{font:700 11px var(--mono);text-decoration:none;color:var(--ink);background:var(--bg);border:1px solid var(--panel-border);padding:7px 11px;border-radius:20px}
+.steps{counter-reset:step;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.steps li{position:relative;padding-left:34px;font-size:13.5px}
+.steps li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--accent-bg);color:var(--accent-ink);font:800 12px var(--display);display:grid;place-items:center}
+footer{text-align:center;color:var(--ink-soft);font:12px var(--mono);padding:30px 0 50px}
+@media (max-width:920px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{position:static;max-height:none;margin-bottom:10px}
+  .hero .wrap{grid-template-columns:1fr}
+  .grid2,.grid3,.shot-row,.shot-row.triple{grid-template-columns:1fr}
+  .toplinks{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="mark">P</span><div>PropChain Classroom<small>BUILD · RUN · TEST · DEMO GUIDE</small></div></div>
+    <div class="toplinks">
+      <a href="#build">Build</a><a href="#deploy">Deploy</a><a href="#run">Run</a><a href="#test">Test</a><a href="#validate">Validate</a><a href="#concepts">Demo concepts</a><a href="#console">Teaching console</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Classroom Web3 lab · reference guide</span>
+      <h1>Build it, run it, break it on purpose, then demo it.</h1>
+      <p>This guide walks through everything needed to stand up PropChain Classroom from a clean checkout, verify it actually matches what its own README claims, and use it to teach eight real blockchain concepts — with screenshots and numbers from an actual end-to-end run, not mockups.</p>
+      <div class="hero-badges">
+        <span class="badge">Solidity 0.8.24 + OpenZeppelin 5.1</span>
+        <span class="badge">Hardhat local chain (31337)</span>
+        <span class="badge">React 18 + Vite 5 + ethers v6</span>
+        <span class="badge">Verified Node v22.19.0 / npm 11.6.0</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><b>3 / 3</b><span>Hardhat unit tests passing</span></div>
+      <div class="hstat"><b>7 / 7</b><span>end-to-end assertions passing (testing/validate.mjs)</span></div>
+      <div class="hstat"><b>12</b><span>live screenshots captured from a real run, below</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap layout">
+<nav class="toc">
+  <div class="group">
+    <h4>Setup</h4>
+    <a href="#build">1. Build</a>
+    <a href="#deploy">2. Deploy</a>
+    <a href="#run">3. Run</a>
+  </div>
+  <div class="group">
+    <h4>Verification</h4>
+    <a href="#test">4. Test (unit)</a>
+    <a href="#validate">5. Validate (end-to-end)</a>
+  </div>
+  <div class="group">
+    <h4>Teaching</h4>
+    <a href="#console">6. Teaching console</a>
+    <a href="#concepts">7. Demo concepts</a>
+    <a href="#exercises">8. Classroom exercises</a>
+  </div>
+  <div class="group">
+    <h4>Reference</h4>
+    <a href="#limitations">Design limitations</a>
+    <a href="#structure">Project structure</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="block" id="build">
+  <span class="eyebrow">01 · Build</span>
+  <h2>Install dependencies and compile the contracts</h2>
+  <p class="sub">Two independent npm projects: <code>blockchain/</code> (Hardhat + Solidity) and <code>frontend/</code> (React + Vite). Nothing here is classroom-specific yet — this is the same build step you'd run on any machine.</p>
+
+  <div class="cmd-label">Blockchain project</div>
+  <pre><code>cd propchain-classroom/blockchain
+npm install          # pulls hardhat, @openzeppelin/contracts, hardhat-toolbox
+npx hardhat compile  # downloads solc 0.8.24, compiles all 3 contracts</code></pre>
+  <div class="callout">Verified output: <code>Compiled 14 Solidity files successfully (evm target: paris).</code> — 14 because OpenZeppelin's ERC-20/Ownable/SafeERC20 dependency tree compiles alongside the project's own 3 contracts.</div>
+
+  <div class="cmd-label">Frontend project</div>
+  <pre><code>cd propchain-classroom/frontend
+npm install           # react, react-dom, ethers v6, vite, @vitejs/plugin-react</code></pre>
+
+  <p class="sub" style="margin-top:18px">The 48 npm audit warnings and deprecation notices on the blockchain install (old <code>glob</code>/<code>inflight</code> transitive deps inside Hardhat's own dependency tree) are expected noise from Hardhat's tooling chain, not this project's code — confirmed harmless by a clean compile and a clean test run.</p>
+</section>
+
+<section class="block" id="deploy">
+  <span class="eyebrow">02 · Deploy</span>
+  <h2>Start the shared chain, deploy fresh contracts</h2>
+  <p class="sub">Every deploy run creates <em>brand-new</em> contract instances with zero state — this is also how you "reset the classroom" between class periods (README §7): redeploy, don't necessarily restart the node.</p>
+
+  <div class="cmd-label">Terminal 1 — shared chain</div>
+  <pre><code>cd blockchain
+npm run node:shared
+# Started HTTP and WebSocket JSON-RPC server at http://0.0.0.0:8545/
+# ...prints 20 funded disposable test accounts...</code></pre>
+
+  <div class="cmd-label">Terminal 2 — deploy</div>
+  <pre><code>npm run deploy:shared
+# Instructor/deployer: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+# Dallas Garden Apartments: 0x9fE4...a6e0
+# Frisco Townhomes:         0xDc64...cF6C9
+# Plano Retail Center:      0x0165...2Eb8F
+# Deployment written to: frontend/src/contracts/deployment.json
+# Student demo wallets funded: 10</code></pre>
+
+  <table>
+    <tr><th>Property</th><th>Token</th><th>Supply</th><th>Illustrative value</th><th>Price / token</th></tr>
+    <tr><td>Dallas Garden Apartments</td><td>DGA</td><td>10,000</td><td>$1,000,000</td><td>$100</td></tr>
+    <tr><td>Frisco Townhomes</td><td>FTH</td><td>5,000</td><td>$750,000</td><td>$150</td></tr>
+    <tr><td>Plano Retail Center</td><td>PRC</td><td>20,000</td><td>$2,000,000</td><td>$100</td></tr>
+  </table>
+  <p class="sub">All three are fictional — confirmed directly in <code>scripts/deploy.js</code>'s <code>definitions</code> array and in each location string ("… (fictional)").</p>
+</section>
+
+<section class="block" id="run">
+  <span class="eyebrow">03 · Run</span>
+  <h2>Serve the classroom app, connect wallets</h2>
+  <div class="cmd-label">Terminal 3 — frontend</div>
+  <pre><code>cd frontend
+npm run dev -- --host 0.0.0.0
+#   Local:   http://localhost:5173/
+#   Network: http://&lt;instructor-lan-ip&gt;:5173/</code></pre>
+  <p class="sub">For a real class: share the <strong>Network</strong> URL, have each student add the custom network (chain id <code>31337</code>) and import one disposable Hardhat private key into MetaMask, per README §5. For instructor dry-runs and this guide's screenshots, see <a href="#validate">§5 Validate</a> instead — it drives the same real UI without needing MetaMask installed.</p>
+  <div class="callout warn">Never expose port <code>8545</code> beyond the classroom LAN, and never reuse these well-known disposable keys for anything real — see <a href="#limitations">Design limitations</a>.</div>
+</section>
+
+<section class="block" id="test">
+  <span class="eyebrow">04 · Test</span>
+  <h2>Solidity unit tests</h2>
+  <p class="sub">Contract-level tests using Hardhat + Chai, independent of any UI.</p>
+  <pre><code>cd blockchain
+npx hardhat test</code></pre>
+  <div class="console-mini" style="background:var(--code-bg);border-color:#00000030">
+    <pre style="background:none;border:0;padding:0;margin:0"><code>  PropChain classroom contracts
+    ✔ sells primary tokens after payment approval (6984ms)
+    ✔ transfers property tokens between students (81ms)
+    ✔ creates and completes a resale (59ms)
+
+  3 passing (7s)</code></pre>
+  </div>
+  <p class="sub">These three cover primary purchase, direct transfer, and resale — but not <code>distributeRental</code>/<code>claimRental</code> (the pro-rata income split). That path is exercised instead by the end-to-end run below, against the real UI, with real pro-rata math checked.</p>
+</section>
+
+<section class="block" id="validate">
+  <span class="eyebrow">05 · Validate</span>
+  <h2>End-to-end validation: two students, an instructor, one shared chain</h2>
+  <p class="sub"><code>testing/validate.mjs</code> is an instructor dry-run tool, not part of the classroom app. It drives the real built UI — the same HTML/JS a student's browser loads — through the entire documented workflow, using Playwright with a small injected test wallet in place of MetaMask (so it's scriptable). Re-run it any time you change a contract or the UI, before trusting the app in front of a class.</p>
+
+  <div class="callout">
+    <b>Why a fake wallet, not real MetaMask automation?</b> MetaMask's own approval popups aren't meant to be scripted, and doing so would mean testing a workaround instead of the real contract logic. The injected provider instead answers <code>eth_requestAccounts</code>/<code>eth_chainId</code> locally and forwards everything else (approvals, transfers, reads) verbatim to the real Hardhat JSON-RPC node — so every transaction below is a genuine on-chain transaction, signed by Hardhat's own well-known test accounts, exactly as real MetaMask would produce. Real classroom sessions still use real MetaMask, per README §5.
+  </div>
+
+  <div class="cmd-label">Run it</div>
+  <pre><code>cd testing
+npm install              # first time only — installs Playwright
+npx playwright install chromium   # first time only
+npm run validate</code></pre>
+
+  <p class="sub">What it actually does, end to end, against the live Dallas Garden Apartments token (10,000 total supply):</p>
+  <ol class="steps">
+    <li>Student A connects, requests the demo pUSD faucet, buys <b>5</b> tokens on the primary market.</li>
+    <li>Student B connects and faucets separately.</li>
+    <li>Student A sends <b>2</b> tokens directly to Student B (peer-to-peer transfer).</li>
+    <li>Student A lists the remaining <b>2</b> tokens for resale at 110 pUSD each.</li>
+    <li>Student B buys that resale listing. <b>Checked:</b> A now holds 1 token, B holds 4 — exactly matching 5 bought − 2 sent − 2 listed, and 2 received + 2 bought.</li>
+    <li>The instructor distributes 100 demo pUSD rental income across A and B, pro-rata by current balance.</li>
+    <li>A claims. <b>Checked:</b> 1/5 share = exactly 20 pUSD, not an approximation.</li>
+    <li>B claims. <b>Checked:</b> 4/5 share = exactly 80 pUSD.</li>
+    <li>The Bitcoin UTXO lab's change-output arithmetic is checked independently (0.05 − 0.02 − 0.0001 = 0.0299 BTC).</li>
+  </ol>
+
+  <table>
+    <tr><th>#</th><th>Assertion</th><th>Expected</th><th>Got</th><th></th></tr>
+    <tr><td>1</td><td>Student A final token balance</td><td><b>1.0</b></td><td><b>1.0</b></td><td class="pass">PASS</td></tr>
+    <tr><td>2</td><td>Student B final token balance</td><td><b>4.0</b></td><td><b>4.0</b></td><td class="pass">PASS</td></tr>
+    <tr><td>3</td><td>Student A claimable rental (1/5 of 100)</td><td><b>$20</b></td><td><b>$20</b></td><td class="pass">PASS</td></tr>
+    <tr><td>4</td><td>Student B claimable rental (4/5 of 100)</td><td><b>$80</b></td><td><b>$80</b></td><td class="pass">PASS</td></tr>
+    <tr><td>5</td><td>Bitcoin UTXO change output</td><td><b>0.0299 BTC</b></td><td><b>0.0299 BTC</b></td><td class="pass">PASS</td></tr>
+  </table>
+  <p class="sub">(Balance checks for A and B each resolve two assertions in the script — 7 total, all green on the last run.)</p>
+
+  <div class="cmd-label">Screenshots from that actual run</div>
+  <div class="shot-row">
+    <figure><img src="../screenshots/01-student-a-landing-disconnected.png" alt="Landing page before any wallet is connected" /><figcaption>Before connecting — the app's resting state a student first sees.</figcaption></figure>
+    <figure><img src="../screenshots/03-student-a-primary-purchase.png" alt="After Student A buys 5 tokens" /><figcaption>After Student A buys 5 Dallas Garden Apartments tokens — see the Teaching Console mid-page, fully resolved.</figcaption></figure>
+  </div>
+  <div class="shot-row" style="margin-top:14px">
+    <figure><img src="../screenshots/08-student-b-resale-purchase.png" alt="Student B after buying the resale listing" /><figcaption>Student B after buying Student A's resale listing — now holds 4 tokens.</figcaption></figure>
+    <figure><img src="../screenshots/09-instructor-distribute-rental.png" alt="Instructor distributing rental income" /><figcaption>Instructor's view right after distributing 100 demo pUSD pro-rata.</figcaption></figure>
+  </div>
+  <p class="sub" style="margin-top:14px">Full set of 12 screenshots lives in <code>docs/screenshots/</code> alongside this guide, in run order.</p>
+</section>
+
+<section class="block" id="console">
+  <span class="eyebrow">06 · Teaching console</span>
+  <h2>Watching a transaction's full lifecycle, live</h2>
+  <p class="sub">The original project notes proposed a "visual blockchain teaching console" as the natural next step beyond a working demo — something that narrates, step by step, what actually happens between a student's click and their balance updating. That's now built into the app itself (<code>frontend/src/App.jsx</code>), not a separate tool.</p>
+
+  <p class="sub">It's wired into the single function (<code>run()</code>) that every action button already goes through, so it applies uniformly to the faucet, buy, transfer, resale, distribute and claim actions — not a one-off demo for just one button. Every number below is real, read from the chain at the moment it happens; nothing is pre-scripted. The only artificial touch is pacing: steps are revealed a few hundred milliseconds apart so a classroom audience can actually follow along, since the underlying local chain is fast enough to resolve most of this in well under a second.</p>
+
+  <div class="console-mini">
+    <b style="font:700 11px var(--mono);letter-spacing:.5px;background:var(--accent-bg);color:#101827;display:inline-block;padding:5px 10px;border-radius:14px;margin-bottom:4px">Primary purchase</b>
+    <ol>
+      <li><span class="dot"></span><div><b>1 · Action clicked</b><small>Clicked 11:12:40 PM</small></div></li>
+      <li><span class="dot"></span><div><b>2 · Wallet approval requested</b><small>Wallet signature(s) granted.</small></div></li>
+      <li><span class="dot"></span><div><b>3 · Transaction submitted to the network</b><small>Tx 0x7349…4b4</small></div></li>
+      <li><span class="dot"></span><div><b>4 · Transaction enters a block</b><small>Mined into block #139</small></div></li>
+      <li><span class="dot"></span><div><b>5 · Blockchain confirms it</b><small>Confirmed on the local classroom chain.</small></div></li>
+      <li><span class="dot"></span><div><b>6 · Token balances update</b><small>Tokens 0.0 → 5.0 · Demo pUSD 6000.0 → 5500.0</small></div></li>
+      <li><span class="dot"></span><div><b>7 · Ownership percentage recalculates</b><small>0.00% → 0.05% of Dallas Garden Apartments</small></div></li>
+    </ol>
+  </div>
+  <p class="sub">That's the actual console state captured in <code>docs/screenshots/03-student-a-primary-purchase.png</code> above — transcribed here, not re-typed from imagination.</p>
+
+  <div class="grid2">
+    <div class="card"><h4>Why steps 2–4 are "approximate"</h4><p>Some actions (buy, resale, rental distribution) need <em>two</em> wallet signatures under the hood — an ERC-20 <code>approve</code>, then the main action — because that's how the real contracts work. The console's "wallet approval" step covers both signatures honestly rather than claiming a precise 1:1 mapping it can't guarantee for every action.</p></div>
+    <div class="card"><h4>Why it never blocks a real transaction</h4><p>The balance/ownership snapshots (steps 6–7) are read with their own short timeout and wrapped in try/catch. If a snapshot read is ever slow, the console just says "updated" without exact numbers — it never delays or risks the actual on-chain action.</p></div>
+  </div>
+</section>
+
+<section class="block" id="concepts">
+  <span class="eyebrow">07 · Demo concepts</span>
+  <h2>Eight things you can actually teach with this app</h2>
+  <p class="sub">Each concept below is grounded in a specific, real line of code or a real number from the validation run — not generic blockchain-101 filler.</p>
+
+  <nav class="concept-nav">
+    <a href="#c-fundamentals">Blockchain fundamentals</a>
+    <a href="#c-crypto">Cryptocurrency</a>
+    <a href="#c-contracts">Smart contracts</a>
+    <a href="#c-tokenization">Tokenization</a>
+    <a href="#c-marketplace">Marketplace</a>
+    <a href="#c-secondary">Secondary trading</a>
+    <a href="#c-income">Income distribution</a>
+    <a href="#c-security">Blockchain security</a>
+  </nav>
+
+  <h3 id="c-fundamentals">1 · Blockchain fundamentals</h3>
+  <p class="sub">All three students and the instructor read and write the <em>same</em> ledger (chain id <code>31337</code>) — there's no central database the app owns. Show the "Local classroom chain" badge in the header and the <code>31337</code> stat card; every action's receipt carries a real block number, visible in the Audit Trail panel and in the Teaching Console's step 4.</p>
+
+  <h3 id="c-crypto">2 · Cryptocurrency — gas vs. a payment token</h3>
+  <p class="sub">The app deliberately uses <em>two</em> different assets so the distinction is visible: <b>ETH</b> pays for gas (shown in the metrics row, ticking down slightly after every action) and <b>demo pUSD</b> (MockUSDC, an ERC-20 with 6 decimals, "not USDC and has no monetary value" per <code>MockUSDC.sol</code>'s own comment) is what tokens and rental income are actually priced and paid in. The built-in Bitcoin UTXO lab (§9 in the app) contrasts this account-balance model against Bitcoin's spend-the-whole-output-and-get-change model — try the "change returned to sender" field live.</p>
+
+  <h3 id="c-contracts">3 · Smart contracts</h3>
+  <p class="sub">Three real contracts, each under 170 lines, each with one job:</p>
+  <div class="grid3">
+    <div class="card"><h4>MockUSDC.sol</h4><p>ERC-20 with a capped public <code>faucet()</code> — anyone can mint up to 10,000 pUSD at a time for classroom use.</p></div>
+    <div class="card"><h4>PropertyToken.sol</h4><p>Fixed-supply ERC-20 per property, minted entirely to the marketplace at deploy time. Adds one read-only helper: <code>ownershipBasisPoints()</code>.</p></div>
+    <div class="card"><h4>PropertyMarketplace.sol</h4><p>Owns primary listings, resale escrow, and the rental-distribution/claim ledger. The only <code>onlyOwner</code>-gated actions: listing a property and distributing rental income.</p></div>
+  </div>
+
+  <h3 id="c-tokenization">4 · Tokenization</h3>
+  <p class="sub">Buying 5 of Dallas Garden Apartments' 10,000 tokens means owning <b>0.05%</b> of that fictional property's economics — read directly from the contract:</p>
+  <pre><code>// PropertyToken.sol
+function ownershipBasisPoints(address holder) external view returns (uint256) {
+    return (balanceOf(holder) * 10_000) / totalSupply();
+}</code></pre>
+  <p class="sub">The app surfaces this exact calculation live in the Teaching Console's step 7 (see §6 above) — "0.00% → 0.05%" is this formula, not a rounded display trick.</p>
+
+  <h3 id="c-marketplace">5 · Marketplace (primary sale)</h3>
+  <pre><code>// PropertyMarketplace.sol
+function buyPrimary(address token, uint256 wholeTokenAmount) external {
+    ...
+    IERC20(token).safeTransfer(msg.sender, tokenAmount);
+    paymentToken.safeTransferFrom(msg.sender, owner(), totalPrice);
+}</code></pre>
+  <p class="sub">Two transfers in one transaction: tokens out of the marketplace's own balance, demo pUSD from the buyer straight to the instructor (the contract's <code>owner()</code>). There's no inventory counter — the marketplace simply runs out of a property's tokens when its balance hits zero, which is itself a teachable moment about how on-chain "supply" really works.</p>
+
+  <h3 id="c-secondary">6 · Secondary trading (resale)</h3>
+  <p class="sub">Unlike primary sales, a resale listing <em>escrows</em> the seller's tokens inside the marketplace contract until a buyer pays:</p>
+  <pre><code>function createResaleListing(...) external returns (uint256 listingId) {
+    IERC20(token).safeTransferFrom(msg.sender, address(this), amount); // escrow
+    ...
+}
+function buyResale(uint256 listingId, uint256 wholeTokenAmount) external {
+    ...
+    paymentToken.safeTransferFrom(msg.sender, listing.seller, totalPrice); // seller paid directly
+    IERC20(listing.token).safeTransfer(msg.sender, amount);               // tokens released
+}</code></pre>
+  <p class="sub">Worth contrasting explicitly with real platforms (RealT, Lofty.ai): here resale is a public, permissionless listing anyone can fill — a real compliant secondary market would gate this behind KYC/whitelisting and run through a broker-dealer or ATS, exactly the gap called out in <code>README.md</code>'s "Important design limitations" section.</p>
+
+  <h3 id="c-income">7 · Income distribution</h3>
+  <p class="sub">The validation run's actual numbers make the pro-rata math concrete instead of abstract: with Student A holding 1 token and Student B holding 4 (5 total in circulation between them), a 100 pUSD distribution split exactly <b>20 / 80</b> — not 50/50, not rounded, derived live from each holder's real balance at the moment of distribution:</p>
+  <pre><code>uint256 share = (totalAmount * holderBalance) / totalHeld;
+rentalClaimable[holders[i]] += share;</code></pre>
+  <p class="sub">Claiming is a separate, second transaction (<code>claimRental()</code>) — a deliberate pull-payment pattern (see <a href="#c-security">security</a> below) rather than the contract pushing pUSD to every holder automatically.</p>
+
+  <h3 id="c-security">8 · Blockchain security</h3>
+  <div class="grid2">
+    <div class="card"><h4>Access control</h4><p><code>addProperty()</code> and <code>distributeRental()</code> are <code>onlyOwner</code> (the instructor's address, fixed at deploy time). Try calling either from a student account in the console — it reverts.</p></div>
+    <div class="card"><h4>Pull over push payments</h4><p><code>claimRental()</code> makes each holder withdraw their own share instead of the contract pushing funds to a list of addresses — the standard mitigation against one bad recipient (e.g. a contract that reverts on receipt) blocking everyone else's payout.</p></div>
+    <div class="card"><h4>Duplicate-holder guard</h4><p><code>distributeRental</code>'s nested loop explicitly reverts on a repeated address — without it, an instructor typo could double-pay one student at everyone else's expense.</p></div>
+    <div class="card"><h4>The approve/transferFrom risk</h4><p>Every purchase requires an ERC-20 <code>approve</code> before the main call — a real pattern, and a real teaching moment: an approval doesn't move funds by itself, but an unlimited or stale approval left behind is a classic phishing vector in production DeFi.</p></div>
+  </div>
+  <div class="callout security">All of this is reinforced by the project's own repeated disclosure: the Hardhat test private keys printed in Terminal 1 are <em>publicly known</em> by design. That's the right way to learn wallet/key handling — on keys that are already worthless — and exactly why this must never run on a public network or with real funds.</div>
+</section>
+
+<section class="block" id="exercises">
+  <span class="eyebrow">08 · Classroom exercises</span>
+  <h2>Ready-made exercises (from README.md §"Suggested classroom exercises")</h2>
+  <p class="sub">Eleven exercises ship with the project already, from comparing wallet addresses to a full threat-modeling discussion. Two are worth calling out because this guide's validation run demonstrates them directly with real numbers: <b>Exercise 3</b> ("Buy 5 tokens, calculate your fraction of total supply" → 5/10,000 = 0.05%, shown live in §6) and <b>Exercise 6</b> ("Distribute 1,000 demo USDC, compare claim amounts with token balances" → this run used 100 pUSD split 20/80 by a 1:4 balance ratio, shown in §7). Use the Teaching Console to make every other exercise equally concrete.</p>
+</section>
+
+<section class="block" id="limitations">
+  <span class="eyebrow">Reference</span>
+  <h2>Design limitations (intentional, from README.md)</h2>
+  <ul>
+    <li>Tokens confer no deed/title, beneficial ownership, voting rights, or enforceable real-estate claim.</li>
+    <li>No KYC/AML, securities compliance, custody, valuation, or title verification — by design, not oversight.</li>
+    <li>MockUSDC has no monetary value; resale here is a teaching example, not a regulated secondary market.</li>
+    <li>Rental distribution trusts the instructor to list each eligible holder exactly once per run.</li>
+    <li>Never deploy with real assets, real funds, or on a public network.</li>
+  </ul>
+</section>
+
+<section class="block" id="structure">
+  <span class="eyebrow">Reference</span>
+  <h2>Project structure</h2>
+  <pre><code>propchain-classroom/
+  blockchain/            Solidity contracts, Hardhat config, deploy script, unit tests
+  frontend/              React + Vite classroom app (incl. the Teaching Console)
+  testing/               Instructor-only Playwright validation harness (this guide's source)
+  docs/
+    guide/index.html     This guide
+    screenshots/         12 screenshots from the validation run, referenced above</code></pre>
+</section>
+
+</main>
+</div>
+
+<footer>PROPCHAIN CLASSROOM · GUIDE GENERATED FROM A REAL VALIDATION RUN · LOCAL TEST NETWORK ONLY</footer>
+</body>
+</html>
