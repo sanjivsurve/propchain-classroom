@@ -239,6 +239,26 @@ The initial property inventory is held by the marketplace contract. The initial 
 
 Every action above also lights up the **Live Teaching Console** at the top of the page — a real-time, step-by-step narration (click → wallet approval → submitted → mined into a block → confirmed → balances update → ownership % recalculates) using that transaction's own real data, not a canned animation. See `docs/guide/index.html` section 6 for a worked example.
 
+### Try the Live Teaching Console yourself (single machine, quick test)
+
+Section 5 above configures MetaMask for a *multi-machine* classroom LAN. If you're just testing solo on one machine — instructor and "student" both in the same browser — this is the fastest path, using `localhost` instead of a LAN IP:
+
+1. **Install MetaMask** (if you haven't already) — Chrome, Edge, Brave, or Firefox. Not Safari.
+2. **Add the custom network in MetaMask** — network dropdown → **Add network** → **Add a network manually**:
+   - Network name: `PropChain Classroom`
+   - RPC URL: `http://localhost:8545`
+   - Chain ID: `31337`
+   - Currency symbol: `ETH`
+3. **Import a test account** — account icon → **Add account or hardware wallet** → **Import account**, then paste one of the disposable Hardhat private keys printed in the node terminal (section 2) when it started. These are the same public, zero-value test keys every Hardhat user gets:
+   - Account #0 (instructor): `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
+   - Account #1 (student): `0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d`
+4. **Open the app** — `http://localhost:5173`, in the same browser where MetaMask is installed.
+5. **Connect** — click **Connect wallet** (top right), approve in the MetaMask popup. The network badge should flip to green **"● Local classroom chain"**. If it still says "Wrong/disconnected network," double-check MetaMask is switched to the `PropChain Classroom` network you just added.
+6. **Trigger an action and watch** — click **"Get 1,000 demo pUSD"** first (cheapest/fastest, one signature), approve the MetaMask popup, then watch the dark-green **"00 / LIVE TEACHING CONSOLE"** panel near the top of the page light up its 7 steps one by one in real time.
+7. **Try a richer one** — click **"Approve & buy tokens"** (two signatures: approve pUSD spend, then the purchase) to see the console handle a two-signature action, including real before/after numbers in steps 6 and 7 (token balance and ownership % actually changing).
+
+Every button on the page re-triggers the console with that action's own real label and data — Transfer, List for resale, Claim, etc. each narrate differently.
+
 ## 7. Reset the classroom
 
 Stop the Hardhat node (Ctrl+C), then start it again and rerun deployment. This creates a fresh chain and new test state. Student MetaMask accounts remain the same, but their balances on the fresh chain reset. Note: each `npm run deploy:shared` already creates brand-new, zero-state contract instances, so redeploying alone (without restarting the node) is also a valid reset for most purposes.

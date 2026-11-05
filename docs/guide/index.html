@@ -318,6 +318,19 @@ npm run validate</code></pre>
     <div class="card"><h4>Why steps 2–4 are "approximate"</h4><p>Some actions (buy, resale, rental distribution) need <em>two</em> wallet signatures under the hood — an ERC-20 <code>approve</code>, then the main action — because that's how the real contracts work. The console's "wallet approval" step covers both signatures honestly rather than claiming a precise 1:1 mapping it can't guarantee for every action.</p></div>
     <div class="card"><h4>Why it never blocks a real transaction</h4><p>The balance/ownership snapshots (steps 6–7) are read with their own short timeout and wrapped in try/catch. If a snapshot read is ever slow, the console just says "updated" without exact numbers — it never delays or risks the actual on-chain action.</p></div>
   </div>
+
+  <h3 style="margin-top:28px">Try it yourself (single machine, quick test)</h3>
+  <p class="sub">With the node, deployment, and frontend from sections 1–3 already running, this is the fastest way to watch the console live — instructor and "student" both in the same browser, using <code>localhost</code> instead of a LAN IP (see README.md §5 for the multi-machine classroom version).</p>
+  <ol class="steps">
+    <li><b>Install MetaMask</b> — Chrome, Edge, Brave, or Firefox. Not Safari.</li>
+    <li><b>Add the network</b> — MetaMask → network dropdown → Add network → Add a network manually: name <code>PropChain Classroom</code>, RPC URL <code>http://localhost:8545</code>, chain ID <code>31337</code>, currency symbol <code>ETH</code>.</li>
+    <li><b>Import a test account</b> — account icon → Add account or hardware wallet → Import account, then paste one of the disposable Hardhat keys printed by <code>npm run node:shared</code> (account #0 is the instructor, #1 a student — see README.md §"Try the Live Teaching Console yourself" for the exact keys).</li>
+    <li><b>Open the app</b> — <code>http://localhost:5173</code>, in the same browser where MetaMask is installed.</li>
+    <li><b>Connect</b> — click Connect wallet, approve in MetaMask. The badge should flip to green "● Local classroom chain"; if it says "Wrong/disconnected network," switch MetaMask to the PropChain Classroom network.</li>
+    <li><b>Trigger an action</b> — click "Get 1,000 demo pUSD" (one signature) and watch the console's 7 steps light up in real time.</li>
+    <li><b>Try a richer one</b> — "Approve & buy tokens" needs two signatures, and shows real before/after numbers in steps 6–7 (balance and ownership % actually changing).</li>
+  </ol>
+  <p class="sub">Every button re-triggers the console with that action's own real label and data — Transfer, List for resale, Claim, etc. each narrate differently.</p>
 </section>
 
 <section class="block" id="concepts">
