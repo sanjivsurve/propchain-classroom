@@ -9,6 +9,23 @@ A classroom-only educational demo of fractional real-estate tokenization using:
 
 **No real property, investment, legal ownership, or real money is involved.** The demo tokens represent fictional educational interests only. Do not use Hardhat private keys or this software with real funds.
 
+## Tech stack
+
+| Layer | Technology | Version (this repo) |
+|---|---|---|
+| Smart contracts | Solidity | `^0.8.24` |
+| Smart contracts | OpenZeppelin Contracts (ERC-20, Ownable, SafeERC20) | `^5.1.0` |
+| Local blockchain / dev tooling | Hardhat | `^2.22.17` |
+| Local blockchain / dev tooling | Hardhat Toolbox (`@nomicfoundation/hardhat-toolbox`) | `^5.0.0` |
+| Frontend | React | `^18.3.1` |
+| Frontend | Vite | `^5.4.11` |
+| Frontend | ethers.js | `^6.13.5` |
+| Wallet | MetaMask (browser extension, EIP-1193 provider) | student/instructor-installed |
+| Instructor-only E2E validation | Playwright | `^1.49.1` |
+| Runtime | Node.js | LTS; this repo's own validation pass used Node 22.19.0 / npm 11.6.0 |
+
+No backend server and no database — the Hardhat node *is* the shared state, and the frontend talks to it directly over JSON-RPC via `ethers.js`. See `blockchain/package.json`, `frontend/package.json`, and `testing/package.json` for the exact dependency trees.
+
 ## Architecture
 
 - Instructor laptop runs one shared Hardhat node and the Vite web app.
@@ -304,7 +321,7 @@ propchain-classroom/
     package.json
   docs/
     guide/index.html    build/deploy/run/test/validate/demo reference guide
-    screenshots/        screenshots captured by testing/validate.mjs
+    screenshots/        12 captured by testing/validate.mjs + 2 manually cropped close-ups
 ```
 
 ## Learning modules

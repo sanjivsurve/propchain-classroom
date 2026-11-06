@@ -75,7 +75,16 @@ pre code{font-size:12.5px}
 figure{margin:18px 0}
 figure img{width:100%}
 figcaption{font-size:12px;color:var(--ink-soft);margin-top:8px}
-.shot-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+/* Full-page app captures are very tall (one long scrolling screen) --
+   cramming two side by side shrinks the text past legibility, so these
+   render one per row at a capped width; click any one to open the
+   full-resolution PNG in a new tab. */
+.shot-row{display:grid;grid-template-columns:1fr;gap:22px;max-width:520px;margin:18px auto}
+.shot-row a{display:block}
+.shot-row img{border:1px solid var(--panel-border);border-radius:8px;cursor:zoom-in}
+/* Close-up crops of one panel (ownership stat, audit trail, etc.) are
+   short and wide, so these pair up fine at half width. */
+.shot-row.crops{grid-template-columns:repeat(2,1fr);max-width:none;margin:18px 0}
 .shot-row.triple{grid-template-columns:repeat(3,1fr)}
 table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
 th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--panel-border)}
@@ -101,7 +110,7 @@ footer{text-align:center;color:var(--ink-soft);font:12px var(--mono);padding:30p
   .layout{grid-template-columns:1fr}
   nav.toc{position:static;max-height:none;margin-bottom:10px}
   .hero .wrap{grid-template-columns:1fr}
-  .grid2,.grid3,.shot-row,.shot-row.triple{grid-template-columns:1fr}
+  .grid2,.grid3,.shot-row.crops,.shot-row.triple{grid-template-columns:1fr}
   .toplinks{display:none}
 }
 </style>
@@ -282,15 +291,21 @@ npm run validate</code></pre>
   <p class="sub">(Balance checks for A and B each resolve two assertions in the script — 7 total, all green on the last run.)</p>
 
   <div class="cmd-label">Screenshots from that actual run</div>
+  <p class="sub">These are full real screenshots of the single-page app — each one very tall, since the whole workflow lives on one scrolling page rather than separate dashboard screens. Click any one to open it full-resolution in a new tab.</p>
   <div class="shot-row">
-    <figure><img src="../screenshots/01-student-a-landing-disconnected.png" alt="Landing page before any wallet is connected" /><figcaption>Before connecting — the app's resting state a student first sees.</figcaption></figure>
-    <figure><img src="../screenshots/03-student-a-primary-purchase.png" alt="After Student A buys 5 tokens" /><figcaption>After Student A buys 5 Dallas Garden Apartments tokens — see the Teaching Console mid-page, fully resolved.</figcaption></figure>
+    <figure><a href="../screenshots/01-student-a-landing-disconnected.png" target="_blank" rel="noopener"><img src="../screenshots/01-student-a-landing-disconnected.png" alt="Landing page before any wallet is connected" /></a><figcaption>Before connecting — the app's resting state a student first sees.</figcaption></figure>
+    <figure><a href="../screenshots/03-student-a-primary-purchase.png" target="_blank" rel="noopener"><img src="../screenshots/03-student-a-primary-purchase.png" alt="After Student A buys 5 tokens" /></a><figcaption>After Student A buys 5 Dallas Garden Apartments tokens — see the Teaching Console mid-page, fully resolved.</figcaption></figure>
+    <figure><a href="../screenshots/08-student-b-resale-purchase.png" target="_blank" rel="noopener"><img src="../screenshots/08-student-b-resale-purchase.png" alt="Student B after buying the resale listing" /></a><figcaption>Student B after buying Student A's resale listing — now holds 4 tokens.</figcaption></figure>
+    <figure><a href="../screenshots/09-instructor-distribute-rental.png" target="_blank" rel="noopener"><img src="../screenshots/09-instructor-distribute-rental.png" alt="Instructor distributing rental income" /></a><figcaption>Instructor's view right after distributing 100 demo pUSD pro-rata.</figcaption></figure>
   </div>
-  <div class="shot-row" style="margin-top:14px">
-    <figure><img src="../screenshots/08-student-b-resale-purchase.png" alt="Student B after buying the resale listing" /><figcaption>Student B after buying Student A's resale listing — now holds 4 tokens.</figcaption></figure>
-    <figure><img src="../screenshots/09-instructor-distribute-rental.png" alt="Instructor distributing rental income" /><figcaption>Instructor's view right after distributing 100 demo pUSD pro-rata.</figcaption></figure>
+
+  <div class="cmd-label" style="margin-top:28px">Two close-ups: ownership % and the on-chain transaction list</div>
+  <p class="sub">Cropped from the full screenshot above so the two numbers that matter are actually legible without clicking through.</p>
+  <div class="shot-row crops">
+    <figure><a href="../screenshots/13-ownership-closeup.png" target="_blank" rel="noopener"><img src="../screenshots/13-ownership-closeup.png" alt="Close-up of the Teaching Console's balance and ownership-percentage steps" /></a><figcaption>Teaching Console steps 6–7, cropped: token balance and ownership % recalculating from real on-chain reads after Student A's purchase.</figcaption></figure>
+    <figure><a href="../screenshots/14-audit-trail-closeup.png" target="_blank" rel="noopener"><img src="../screenshots/14-audit-trail-closeup.png" alt="Close-up of the Audit Trail panel listing recent transactions" /></a><figcaption>The Audit Trail panel — this app's equivalent of a block explorer's transaction list, scoped to the current session.</figcaption></figure>
   </div>
-  <p class="sub" style="margin-top:14px">Full set of 12 screenshots lives in <code>docs/screenshots/</code> alongside this guide, in run order.</p>
+  <p class="sub" style="margin-top:14px">Full set of 14 screenshots lives in <code>docs/screenshots/</code> alongside this guide, in run order.</p>
 </section>
 
 <section class="block" id="console">
@@ -436,7 +451,7 @@ rentalClaimable[holders[i]] += share;</code></pre>
   testing/               Instructor-only Playwright validation harness (this guide's source)
   docs/
     guide/index.html     This guide
-    screenshots/         12 screenshots from the validation run, referenced above</code></pre>
+    screenshots/         12 from the validation run + 2 cropped close-ups, referenced above</code></pre>
 </section>
 
 </main>
