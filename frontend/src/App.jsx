@@ -1,9 +1,57 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { BrowserProvider, Contract, formatUnits, parseUnits } from "ethers";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { BrowserProvider, Contract, ZeroAddress, formatUnits, parseUnits } from "ethers";
 import deployment from "./contracts/deployment.json";
+import { HARDHAT_TEST_ACCOUNTS } from "./hardhatTestAccounts";
 
 const short = (s) => s ? `${s.slice(0, 6)}…${s.slice(-4)}` : "—";
 const usd = (v) => `$${Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+
+// A remote student reaching this app through a Cloudflare tunnel sees a
+// *different* hostname for the frontend than for the Hardhat RPC node --
+// each quick tunnel gets its own random subdomain, so the "same host,
+// different port" trick that works on a LAN can't work here. Letting the
+// instructor pass the RPC tunnel's URL as `?rpc=...` on the shared link
+// means one URL gets a remote student fully set up; see the Student
+// Quickstart panel, which builds this link for the instructor.
+const rpcOverride = new URLSearchParams(window.location.search).get("rpc");
+
+// Simple circle-packing for the ownership bubble map: place circles one
+// at a time along an outward spiral from the center, skipping any angle
+// that would overlap something already placed. No physics simulation and
+// no extra dependency -- good enough for the handful of wallets a
+// classroom chain actually has.
+const packCircles = (items, size) => {
+  const center = size / 2;
+  const placed = [];
+  for (const item of items) {
+    let x = center, y = center;
+    if (placed.length > 0) {
+      let radius = item.r + 6;
+      let found = false;
+      for (let guard = 0; guard < 400 && !found; guard++) {
+        const steps = Math.max(10, Math.floor(radius / 4));
+        for (let i = 0; i < steps; i++) {
+          const angle = (i / steps) * Math.PI * 2 + radius * 0.08;
+          const tx = center + radius * Math.cos(angle);
+          const ty = center + radius * Math.sin(angle);
+          const overlaps = placed.some((p) => {
+            const dx = p.x - tx, dy = p.y - ty;
+            return Math.sqrt(dx * dx + dy * dy) < p.r + item.r + 5;
+          });
+          if (!overlaps) { x = tx; y = ty; found = true; break; }
+        }
+        radius += 5;
+      }
+    }
+    // Clamp so a crowded spiral can never push a bubble visually outside
+    // the canvas -- better to let dense bubbles touch than to overflow.
+    x = Math.max(item.r, Math.min(size - item.r, x));
+    y = Math.max(item.r, Math.min(size - item.r, y));
+    placed.push({ ...item, x, y });
+  }
+  return placed;
+};
+const BUBBLE_COLORS = ["#172b42", "#6f9e1f", "#b8860b", "#8a4fdb", "#1e8f8f", "#c25b3c", "#4169a8", "#9a6fb0", "#2f8a5a", "#c2436b", "#5a6b7a"];
 
 // Blockchain Teaching Console: narrates the real lifecycle of whichever
 // action the student just triggered, using that transaction's own data
@@ -48,6 +96,12 @@ export default function App() {
   const [btcSpend, setBtcSpend] = useState("0.012");
   const [consoleSteps, setConsoleSteps] = useState([]);
   const [consoleLabel, setConsoleLabel] = useState("");
+  const [ownershipHolders, setOwnershipHolders] = useState([]);
+  const [ownershipSupply, setOwnershipSupply] = useState(0n);
+  const [ownershipFocus, setOwnershipFocus] = useState("");
+  const [copiedTag, setCopiedTag] = useState("");
+  const [rpcInput, setRpcInput] = useState(rpcOverride || "");
+  const permissionsRegrantedRef = useRef(false);
 
   const provider = useMemo(() => window.ethereum ? new BrowserProvider(window.ethereum) : null, [account, chainId]);
   const signerAddress = account;
@@ -87,6 +141,37 @@ export default function App() {
     }
   };
 
+  // Builds the ownership bubble map the same way a real block explorer
+  // would: scan the token's own Transfer events for every address that
+  // has ever held a balance, then read each one's current balance --
+  // not a hardcoded guest list of "the 10 known demo accounts," so it
+  // stays correct even if an instructor funds extra wallets by hand.
+  const loadOwnershipMap = async () => {
+    if (!window.ethereum || !selected) return;
+    try {
+      const { s } = await getContracts();
+      const token = await tokenContract(selected, s);
+      const events = await token.queryFilter(token.filters.Transfer(), 0, "latest");
+      const addrs = new Set();
+      for (const ev of events) {
+        if (ev.args.from !== ZeroAddress) addrs.add(ev.args.from);
+        if (ev.args.to !== ZeroAddress) addrs.add(ev.args.to);
+      }
+      const supply = await token.totalSupply();
+      const rows = await Promise.all([...addrs].map(async (address) => ({
+        address, balance: await token.balanceOf(address)
+      })));
+      const nonZero = rows.filter((r) => r.balance > 0n).sort((a, b) => (a.balance > b.balance ? -1 : 1));
+      setOwnershipHolders(nonZero);
+      setOwnershipSupply(supply);
+    } catch {
+      // Ownership map is a bonus visualization -- never surface its
+      // errors in the main status banner, which real actions use.
+    }
+  };
+
+  useEffect(() => { loadOwnershipMap(); }, [selected, account, chainId]);
+
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on?.("accountsChanged", (accounts) => {
@@ -104,15 +189,27 @@ export default function App() {
       if (!window.ethereum) throw new Error("Install MetaMask first.");
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       setAccount(accounts[0]);
+      // One click does both steps: request the account, then immediately
+      // offer to add/switch to the classroom network too, instead of
+      // leaving a student stuck on "Wrong / disconnected network" until
+      // they happen to press an action button first.
+      try { await ensureNetwork(); } catch { /* student can retry via any action button below */ }
       const p = new BrowserProvider(window.ethereum);
       const network = await p.getNetwork();
       setChainId(network.chainId.toString());
-      setMessage("Wallet connected. Check that MetaMask is on PropChain Classroom (chain 31337).");
+      setMessage(network.chainId.toString() === "31337"
+        ? "Wallet connected to the PropChain Classroom network."
+        : "Wallet connected, but MetaMask didn't switch networks -- try any action button below, or switch manually.");
     } catch (e) { setMessage(e.message); }
   };
 
   const ensureNetwork = async () => {
     if (!window.ethereum) throw new Error("MetaMask not found.");
+    // A remote student's RPC endpoint is NOT "this same host, port 8545"
+    // -- the frontend and the Hardhat node are two independent Cloudflare
+    // tunnel hostnames. `?rpc=` (set by the instructor's shareable link,
+    // see the Student Quickstart panel) overrides the LAN-style guess.
+    const rpcUrl = rpcOverride || `http://${window.location.hostname}:8545`;
     try {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
@@ -126,11 +223,53 @@ export default function App() {
           chainId: "0x7a69",
           chainName: "PropChain Classroom",
           nativeCurrency: { name: "Test Ether", symbol: "ETH", decimals: 18 },
-          rpcUrls: [`http://${window.location.hostname}:8545`],
+          rpcUrls: [rpcUrl],
           blockExplorerUrls: []
         }]
       });
     }
+
+    // Workaround for a MetaMask regression (v13.55+): an account already
+    // connected to this site doesn't get re-scoped to a chain that was
+    // just added via wallet_addEthereumChain -- eth_accounts still returns
+    // it, but eth_sendTransaction silently rejects with a 4100 "not
+    // authorized" error (no popup at all). Re-requesting eth_accounts
+    // permission re-grants the account across every permitted chain,
+    // including this one. Only do it once per page load: MetaMask always
+    // shows a confirmation for this request, and asking before every
+    // single action would mean two approvals per transaction instead of one.
+    if (!permissionsRegrantedRef.current) {
+      permissionsRegrantedRef.current = true;
+      try {
+        await window.ethereum.request({
+          method: "wallet_requestPermissions",
+          params: [{ eth_accounts: {} }]
+        });
+      } catch { /* older MetaMask without this bug just denies/no-ops here -- fine either way */ }
+    }
+  };
+
+  const copyText = async (text, tag) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedTag(tag);
+      setTimeout(() => setCopiedTag(""), 1500);
+    } catch {
+      setMessage("Could not copy automatically -- select and copy the text manually.");
+    }
+  };
+
+  // The link an instructor shares with remote students: this page's own
+  // URL plus `?rpc=` pointing at whatever RPC endpoint reaches the
+  // Hardhat node from wherever the student is -- the LAN IP for a LAN
+  // classroom, or a second Cloudflare tunnel's URL for genuinely remote
+  // students (that tunnel is a separate hostname from this one and has
+  // to be started and shared separately; see README.md).
+  const shareableLink = () => {
+    const url = new URL(window.location.href);
+    url.search = "";
+    if (rpcInput.trim()) url.searchParams.set("rpc", rpcInput.trim());
+    return url.toString();
   };
 
   const run = async (label, fn) => {
@@ -183,6 +322,7 @@ export default function App() {
       }
 
       await refresh();
+      /* TEMP-DISABLED-FOR-DEBUG: loadOwnershipMap(); */
       await pace(250);
 
       if (before && snap) {
@@ -268,6 +408,18 @@ export default function App() {
 
   const selectedProperty = deployment.properties.find(p => p.tokenAddress === selected) || deployment.properties[0];
 
+  // Bubble area (not radius) encodes ownership share, so a 2x bigger
+  // holding looks 2x bigger, not 4x -- the same convention real bubble
+  // maps use. A size floor keeps tiny/dust holders clickable.
+  const bubbles = useMemo(() => {
+    if (!ownershipHolders.length || ownershipSupply === 0n) return [];
+    const sized = ownershipHolders.map((h) => {
+      const bp = Number((h.balance * 10000n) / ownershipSupply) / 100;
+      return { ...h, bp, r: Math.max(16, Math.min(60, 16 + Math.sqrt(bp) * 11)) };
+    });
+    return packCircles(sized, 320);
+  }, [ownershipHolders, ownershipSupply]);
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -287,6 +439,44 @@ export default function App() {
             <div className="hero-note">EDUCATIONAL SIMULATION · NO REAL PROPERTY OR MONEY</div>
           </div>
           <div className="hero-stat"><span>CLASSROOM NETWORK</span><strong>31337</strong><small>Hardhat local Ethereum chain</small></div>
+        </section>
+
+        <section className="panel quickstart-panel">
+          <div className="eyebrow">STUDENT QUICKSTART</div>
+          <h2>Get a wallet talking to this chain</h2>
+          <p className="muted">
+            Install MetaMask (Chrome, Edge, Brave, or Firefox -- not Safari), then import one of
+            Hardhat's own public test accounts below. Pick a number nobody else in class is using.
+            Once imported, click <b>Connect wallet</b> above -- it now also offers to add/switch
+            MetaMask to the PropChain Classroom network for you, in the same click.
+          </p>
+          <div className="account-grid">
+            {HARDHAT_TEST_ACCOUNTS.map((a) => (
+              <div className={`account-chip ${account && account.toLowerCase() === a.address.toLowerCase() ? "active" : ""}`} key={a.index}>
+                <div className="account-chip-head"><b>#{a.index}</b><span>{a.role}</span></div>
+                <code>{short(a.address)}</code>
+                <button className="secondary" onClick={() => copyText(a.privateKey, `key-${a.index}`)}>
+                  {copiedTag === `key-${a.index}` ? "✅ Copied" : "Copy private key"}
+                </button>
+              </div>
+            ))}
+          </div>
+          <details className="instructor-details">
+            <summary>Instructor: build a one-click link for remote students (Cloudflare tunnel)</summary>
+            <p className="muted">
+              A remote student's MetaMask can't reach <code>localhost:8545</code> or your LAN IP --
+              it needs its own publicly reachable RPC endpoint. Run a second Cloudflare tunnel for
+              the Hardhat node (<code>cloudflared tunnel --url http://localhost:8545</code>, in a
+              new terminal, alongside the one already tunneling the frontend) and paste the URL it
+              prints below. Leave this blank for a same-LAN classroom -- students then use the LAN
+              IP exactly as README.md section 5 describes.
+            </p>
+            <label>RPC tunnel URL (remote students only)</label>
+            <input placeholder="https://random-words.trycloudflare.com" value={rpcInput} onChange={(e) => setRpcInput(e.target.value)} />
+            <button className="primary full spaced" onClick={() => copyText(shareableLink(), "share-link")}>
+              {copiedTag === "share-link" ? "✅ Copied" : "Copy shareable student link"}
+            </button>
+          </details>
         </section>
 
         <section className="metrics">
@@ -336,6 +526,54 @@ export default function App() {
               </div>
             </article>
           ))}
+        </section>
+
+        <section className="panel ownership-panel">
+          <div className="eyebrow">🫧 TOKEN OWNERSHIP MAP</div>
+          <h2>Who owns {selectedProperty?.name || "this property"}, visually</h2>
+          <p className="muted">
+            Every bubble is a real wallet, found the same way a block explorer finds holders --
+            by scanning this token's on-chain Transfer events, not a hardcoded list. Bubble
+            <b> area</b> (not radius) is proportional to ownership share, so it can't visually
+            exaggerate who owns more. Click a bubble for its exact numbers.
+          </p>
+          {bubbles.length === 0 ? (
+            <p className="muted console-empty">No tokens have been bought yet for this property -- buy some below, then come back.</p>
+          ) : (
+            <div className="bubble-layout">
+              <div className="bubble-canvas" style={{ width: 320, height: 320 }}>
+                {bubbles.map((b) => (
+                  <button
+                    key={b.address}
+                    className={`bubble ${ownershipFocus === b.address ? "focused" : ""} ${account && account.toLowerCase() === b.address.toLowerCase() ? "you" : ""}`}
+                    style={{
+                      width: b.r * 2, height: b.r * 2,
+                      left: b.x - b.r, top: b.y - b.r,
+                      background: BUBBLE_COLORS[bubbles.indexOf(b) % BUBBLE_COLORS.length]
+                    }}
+                    onClick={() => setOwnershipFocus(b.address === ownershipFocus ? "" : b.address)}
+                    title={`${short(b.address)} · ${b.bp.toFixed(2)}%`}
+                  >
+                    {b.bp >= 3 ? `${b.bp.toFixed(1)}%` : ""}
+                  </button>
+                ))}
+              </div>
+              <div className="bubble-detail">
+                {(() => {
+                  const focused = bubbles.find((b) => b.address === ownershipFocus) || bubbles[0];
+                  if (!focused) return null;
+                  return (
+                    <>
+                      <div className="bubble-detail-row"><span>Wallet</span><code>{focused.address}</code></div>
+                      <div className="bubble-detail-row"><span>{focused.address.toLowerCase() === account?.toLowerCase() ? "You hold" : "Holds"}</span><b>{formatUnits(focused.balance, 18)} tokens</b></div>
+                      <div className="bubble-detail-row"><span>Ownership share</span><b>{focused.bp.toFixed(2)}%</b></div>
+                      <p className="muted">{bubbles.length} wallet{bubbles.length === 1 ? "" : "s"} hold a nonzero balance right now, out of {formatUnits(ownershipSupply, 18)} total tokens.</p>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="two-col">

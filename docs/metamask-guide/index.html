@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PropChain Classroom — MetaMask Setup &amp; Safety Guide</title>
+<meta name="description" content="How to install MetaMask, import a disposable classroom test account, connect to PropChain Classroom over a Cloudflare tunnel, and verify a real transaction — written so a student can never confuse a real wallet with the fake classroom one." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#ffffff; --panel-border:#e2e7eb; --ink:#172033; --ink-soft:#647286;
+  --navy:#101827; --navy-soft:#8f9bad; --accent:#6f9e1f; --accent-bg:#b8f36b; --accent-ink:#172033;
+  --console-bg:#101b14; --console-border:#1f2d22; --console-ink:#e7f3e0; --code-bg:#0f1a28; --code-ink:#d9e3f0;
+  --mono:'DM Mono',ui-monospace,monospace; --sans:'DM Sans',sans-serif; --display:'Manrope',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f16; --panel:#131a26; --panel-border:#232e40; --ink:#e8edf5; --ink-soft:#9fadc2;
+    --navy:#0a0f1a; --navy-soft:#8f9bad; --accent:#b8f36b; --accent-bg:#b8f36b; --accent-ink:#101827;
+    --console-bg:#0a1310; --console-border:#1a271c; --console-ink:#d8ecd0; --code-bg:#0a1220; --code-ink:#cfe0f5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f16; --panel:#131a26; --panel-border:#232e40; --ink:#e8edf5; --ink-soft:#9fadc2;
+  --navy:#0a0f1a; --navy-soft:#8f9bad; --accent:#b8f36b; --accent-bg:#b8f36b; --accent-ink:#101827;
+  --console-bg:#0a1310; --console-border:#1a271c; --console-ink:#d8ecd0; --code-bg:#0a1220; --code-ink:#cfe0f5;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;font-synthesis:none}
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);text-wrap:balance;margin:0}
+code,pre{font-family:var(--mono)}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.topbar{background:var(--navy);color:#fff;padding:18px 0;position:sticky;top:0;z-index:20;border-bottom:1px solid #293548}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font:800 16px var(--display)}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent-bg);color:var(--accent-ink);display:grid;place-items:center;font:800 17px var(--display)}
+.brand small{display:block;color:var(--navy-soft);font:10px var(--mono);letter-spacing:1.4px;margin-top:2px;font-weight:400}
+.toplinks{display:flex;gap:18px;font:600 12px var(--sans)}
+.toplinks a{color:#cfd8e6;text-decoration:none}
+.toplinks a:hover{color:var(--accent-bg)}
+.hero{background:linear-gradient(160deg,var(--navy),#1b2d44);color:#fff;padding:56px 0 46px;margin-bottom:10px}
+.hero .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:36px;align-items:center}
+.eyebrow{font:11px var(--mono);letter-spacing:1.6px;color:var(--accent-bg);text-transform:uppercase}
+.hero h1{font-size:clamp(28px,4vw,42px);line-height:1.12;margin:12px 0 14px;color:#fff}
+.hero p{color:#c3cedd;max-width:52ch;font-size:14.5px}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.badge{font:11px var(--mono);background:#ffffff14;border:1px solid #ffffff26;color:#dce5f1;padding:6px 10px;border-radius:20px}
+.hero-stats{display:grid;gap:10px}
+.hstat{background:#ffffff0d;border:1px solid #ffffff22;border-radius:12px;padding:16px 18px}
+.hstat b{display:block;font:800 26px var(--display);color:var(--accent-bg)}
+.hstat span{display:block;font:11px var(--mono);color:#aebbcc;margin-top:4px}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:34px;padding:34px 0 80px}
+nav.toc{position:sticky;top:76px;align-self:start;font-size:13px;max-height:calc(100vh - 100px);overflow:auto}
+nav.toc .group{margin-bottom:16px}
+nav.toc .group h4{font:700 10px var(--mono);letter-spacing:1px;color:var(--ink-soft);text-transform:uppercase;margin-bottom:6px}
+nav.toc a{display:block;color:var(--ink-soft);text-decoration:none;padding:5px 0;border-left:2px solid transparent}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0}
+section.block{background:var(--panel);border:1px solid var(--panel-border);border-radius:14px;padding:28px 30px;margin-bottom:22px}
+section.block h2{font-size:23px;margin-bottom:6px}
+section.block > .eyebrow{margin-bottom:8px;display:block}
+.sub{color:var(--ink-soft);font-size:13.5px;margin:6px 0 20px;max-width:75ch}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:12.5px;border:1px solid #00000030}
+pre code{font-size:12.5px}
+.cmd-label{font:700 10px var(--mono);letter-spacing:1px;color:var(--ink-soft);text-transform:uppercase;margin:16px 0 6px}
+.cmd-label:first-child{margin-top:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:var(--bg);border:1px solid var(--panel-border);border-radius:10px;padding:16px 18px}
+.card h4{font-size:14px;margin-bottom:6px}
+.card p{font-size:12.5px;color:var(--ink-soft);margin:0}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--panel-border)}
+th{font:700 11px var(--mono);text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft)}
+td b{font-family:var(--mono)}
+.pass{color:#4f8a1e;font-weight:700}
+.callout{border-left:4px solid var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--panel));border-radius:0 10px 10px 0;padding:14px 18px;font-size:13px;margin:16px 0}
+.callout.warn{border-left-color:#e0a23c}
+.callout.security{border-left-color:#d9705a;background:color-mix(in srgb, #d9705a 10%, var(--panel))}
+.console-mini{background:var(--console-bg);border:1px solid var(--console-border);border-radius:10px;padding:16px 18px;color:var(--console-ink);margin:16px 0}
+.steps{counter-reset:step;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.steps li{position:relative;padding-left:34px;font-size:13.5px}
+.steps li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--accent-bg);color:var(--accent-ink);font:800 12px var(--display);display:grid;place-items:center}
+footer{text-align:center;color:var(--ink-soft);font:12px var(--mono);padding:30px 0 50px}
+/* Real vs fake comparison -- the one table on this page that must never
+   be visually subtle. Real side reads as a stop sign on purpose. */
+.rvf{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.rvf .fake{border:2px solid var(--accent);border-radius:12px;padding:16px 18px;background:color-mix(in srgb, var(--accent) 8%, var(--panel))}
+.rvf .real{border:2px solid #d9705a;border-radius:12px;padding:16px 18px;background:color-mix(in srgb, #d9705a 10%, var(--panel))}
+.rvf h4{font:800 13px var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.rvf .fake h4{color:var(--accent)}
+.rvf .real h4{color:#d9705a}
+.rvf ul{margin:0;padding-left:18px;font-size:13px}
+.rvf li{margin-bottom:6px}
+.chip{display:inline-block;font:700 11px var(--mono);background:var(--bg);border:1px solid var(--panel-border);border-radius:6px;padding:2px 7px;margin:0 2px}
+@media (max-width:920px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{position:static;max-height:none;margin-bottom:10px}
+  .hero .wrap{grid-template-columns:1fr}
+  .grid2,.grid3,.rvf{grid-template-columns:1fr}
+  .toplinks{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="mark">P</span><div>PropChain Classroom<small>METAMASK SETUP &amp; SAFETY GUIDE</small></div></div>
+    <div class="toplinks">
+      <a href="#safety">Real vs fake</a><a href="#live-link">Today's link</a><a href="#install">Install</a><a href="#import">Import account</a><a href="#connect">Connect &amp; verify</a><a href="#whats-new">What's new</a><a href="#troubleshooting">Troubleshooting</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Student &amp; instructor guide · read before class</span>
+      <h1>Set up MetaMask for a wallet that holds nothing real.</h1>
+      <p>Every step below was run end-to-end on a real Cloudflare tunnel with a freshly-installed MetaMask before this page was written — including the two places people actually get stuck. The most important thing on this page isn't a click sequence; it's the box right after this paragraph.</p>
+      <div class="hero-badges">
+        <span class="badge">Hardhat local chain (31337)</span>
+        <span class="badge">Zero real funds, ever</span>
+        <span class="badge">Works over a remote Cloudflare tunnel</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><b>0</b><span>real-money accounts touched by this guide</span></div>
+      <div class="hstat"><b>10</b><span>public, disposable Hardhat test accounts, same for everyone</span></div>
+      <div class="hstat"><b>1</b><span>extra account MetaMask adds to your existing wallet — never your main one</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap layout">
+<nav class="toc">
+  <div class="group">
+    <h4>Before you click anything</h4>
+    <a href="#safety">Real vs. fake</a>
+  </div>
+  <div class="group">
+    <h4>Setup</h4>
+    <a href="#live-link">Today's link</a>
+    <a href="#install">1. Install MetaMask</a>
+    <a href="#wallet">2. New wallet or existing?</a>
+    <a href="#import">3. Import the test account</a>
+  </div>
+  <div class="group">
+    <h4>Use it</h4>
+    <a href="#connect">4. Connect &amp; buy tokens</a>
+    <a href="#verify">5. Verify in MetaMask</a>
+  </div>
+  <div class="group">
+    <h4>Reference</h4>
+    <a href="#whats-new">What's new in the app</a>
+    <a href="#troubleshooting">Troubleshooting</a>
+  </div>
+</nav>
+
+<main>
+
+<section class="block" id="safety">
+  <span class="eyebrow">Read this first</span>
+  <h2>You are about to put a second account in your MetaMask. Know which one is which.</h2>
+  <p class="sub">This guide has you install a browser extension that can also hold real cryptocurrency, and import a private key that anyone on the internet already knows. Both of those are completely safe <em>here</em> — but only if you never lose track of which account is which. Keep this table in mind for the rest of the guide.</p>
+
+  <div class="rvf">
+    <div class="fake">
+      <h4>✅ The classroom account (fake)</h4>
+      <ul>
+        <li>Network name reads exactly <b>"PropChain Classroom"</b>, chain ID <code>31337</code></li>
+        <li>Was added by clicking <b>Import account</b> and pasting a private key that's printed in this project's own README and source code</li>
+        <li>"ETH" and property tokens here were created by a script on a laptop five minutes ago</li>
+        <li>Resets to zero the moment the instructor restarts the Hardhat node</li>
+        <li>Safe to screen-share, screenshot, or post the private key anywhere</li>
+      </ul>
+    </div>
+    <div class="real">
+      <h4>🛑 Any other account (potentially real)</h4>
+      <ul>
+        <li>Any account you created by choosing <b>"I have an existing wallet"</b> or typing in your own 12/24-word recovery phrase</li>
+        <li>Any network named Ethereum Mainnet, a real L2 (Base, Arbitrum, Polygon…), or a public testnet</li>
+        <li>Anything you'd use to buy, hold, or receive real crypto, even "just a little"</li>
+        <li>Never paste a private key you don't fully recognize into this account, and never export <em>this</em> account's own private key to anyone</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout security">
+    <b>The one rule that matters:</b> the private keys you'll import in this guide are <em>intentionally public</em> — they're Hardhat's well-known default test keys, documented on Hardhat's own site and reused by every Hardhat project in the world. That's exactly why they must <strong>never</strong> hold anything real: if you ever sent real funds to one of these addresses on a real network, anyone could take it instantly. Going the other direction is just as important — never import <em>your own</em> real wallet's seed phrase or private key into anything related to this classroom exercise.
+  </div>
+</section>
+
+<section class="block" id="live-link">
+  <span class="eyebrow">Today's link</span>
+  <h2>Current Cloudflare tunnel URLs for remote testing</h2>
+  <p class="sub">These two domain-based URLs are live <em>right now</em> and already combined into one student link. A Cloudflare quick tunnel gets a brand-new random hostname every time it restarts (network change, instructor reboot, laptop sleep) — so treat this box as "today's," not permanent. The instructor regenerates it with one command and should re-share it at the start of each session.</p>
+
+  <div class="card" style="background:var(--code-bg);border-color:#00000030">
+    <h4 style="color:var(--code-ink)">App (frontend) tunnel</h4>
+    <p style="font-family:var(--mono);color:var(--code-ink);word-break:break-all">https://task-highly-embassy-doctor.trycloudflare.com</p>
+    <h4 style="color:var(--code-ink);margin-top:12px">RPC (blockchain) tunnel</h4>
+    <p style="font-family:var(--mono);color:var(--code-ink);word-break:break-all">https://sudden-cart-searched-concentrate.trycloudflare.com</p>
+    <h4 style="color:var(--accent-bg);margin-top:12px">Combined student link — open this one</h4>
+    <p style="font-family:var(--mono);color:var(--accent-bg);word-break:break-all">https://task-highly-embassy-doctor.trycloudflare.com?rpc=https://sudden-cart-searched-concentrate.trycloudflare.com</p>
+  </div>
+
+  <div class="callout warn">
+    <b>Instructor:</b> regenerate both tunnels and this link with one command from the <code>propchain-classroom</code> folder:
+    <pre style="margin-top:8px"><code>startPropChain.bat --tunnel   (Windows)
+./startPropChain.sh --tunnel  (macOS/Linux)</code></pre>
+    It prints the combined link at the end and is safe to re-run any time — anything already healthy is left alone, only what's dead gets a fresh tunnel. <code>stopPropChain.bat</code> / <code>.sh</code> shuts everything down afterward.
+  </div>
+</section>
+
+<section class="block" id="install">
+  <span class="eyebrow">1 · Install</span>
+  <h2>Install the MetaMask browser extension</h2>
+  <p class="sub">MetaMask is a browser extension, not a separate app — install it from your browser's own extension store so you get a copy that's verified by Microsoft/Google, not a copy from a random download link.</p>
+  <ol class="steps">
+    <li><b>Edge:</b> open <code>edge://extensions</code> (or search "MetaMask" directly in the Microsoft Edge Add-ons store) → <b>Get</b> → <b>Add extension</b>.<br><b>Chrome:</b> open the Chrome Web Store → search "MetaMask" → <b>Add to Chrome</b>.</li>
+    <li>Pin it to the toolbar (the puzzle-piece icon → pin) so you can get to it in one click.</li>
+    <li>Click the new fox icon to open it for the first time.</li>
+  </ol>
+</section>
+
+<section class="block" id="wallet">
+  <span class="eyebrow">2 · New wallet or existing?</span>
+  <h2>Choose "Create a new wallet" — even if you already use MetaMask elsewhere</h2>
+  <p class="sub">MetaMask's very first screen asks you to create a new wallet or import an existing one. For this classroom exercise the answer is always <b>Create a new wallet</b>, for one simple reason: there is no good reason to mix a throwaway teaching wallet with anything that might hold real value, even though the specific key you'll add later carries zero risk to your other accounts.</p>
+  <ol class="steps">
+    <li>Click <b>Create a new wallet</b> (not "I have an existing wallet").</li>
+    <li>Agree to terms, then set a password — this only encrypts the extension on this device; it has nothing to do with the classroom account.</li>
+    <li>MetaMask shows a 12-word Secret Recovery Phrase for <em>this</em> new, empty wallet. You can skip "secure it now" — this wallet will hold nothing of value, so there's nothing at stake in that phrase. (If you ever do fund this wallet for real later, go back and back up that phrase properly then.)</li>
+    <li>You'll land on the main MetaMask screen with one auto-generated account holding 0 ETH. Ignore it — the next section adds the account you'll actually use.</li>
+  </ol>
+  <div class="callout warn">If you <em>already</em> use MetaMask for real crypto in this browser: good news, you can still safely import the classroom test account as an <em>additional</em> account inside your existing wallet — importing a key only adds an account, it never touches your existing ones. Just be extra careful in <a href="#import">step 3</a> to pick the account you actually want active before connecting it to this app, so you never approve a transaction from the wrong one.</div>
+</section>
+
+<section class="block" id="import">
+  <span class="eyebrow">3 · Import the test account</span>
+  <h2>Import a Hardhat test account by private key</h2>
+  <p class="sub">The app itself hands you these keys — open the classroom link (your instructor's URL, or <code>http://localhost:5173</code>) and look for the <b>Student Quickstart</b> panel near the top. Each of the 10 cards there has a <b>Copy private key</b> button. Copy the one for your assigned account (e.g. "Student 1").</p>
+
+  <div class="card" style="margin-bottom:16px">
+    <h4>Example — Student 1</h4>
+    <p><b>Address:</b> <code>0x70997970C51812dc3A010C7d01b50e0d17dc79C8</code><br>
+    This exact address, and its private key, are printed in this project's own <code>README.md</code> and <code>frontend/src/hardhatTestAccounts.js</code>. Everyone running this project sees the identical 10 accounts — that's expected, and is exactly why they must stay fake forever.</p>
+  </div>
+
+  <p class="sub">Newer MetaMask versions (the ones that also support Bitcoin/Solana/Tron addresses per account) renamed the button and moved it — if your menu doesn't say "Import account" where you expect it, use this exact path instead of guessing:</p>
+  <ol class="steps">
+    <li>Click the <b>account selector</b> at the top of the wallet (shows your current account name).</li>
+    <li>At the bottom of that list, click <b>"Add wallet"</b> — not "Add account," which just creates another empty account under your existing wallet.</li>
+    <li>On the next screen, under the "Add wallet" options, click <b>"Import an account."</b></li>
+    <li>Paste the private key you copied → click <b>Import.</b></li>
+  </ol>
+  <div class="callout">The imported account shows up as a brand-new entry in the account selector. <b>Select it</b> as the active account before moving to the next section — the app connects to whichever account is currently active in MetaMask, not whichever one you imported most recently.</div>
+</section>
+
+<section class="block" id="connect">
+  <span class="eyebrow">4 · Connect &amp; buy</span>
+  <h2>Connect the wallet and complete a real transaction</h2>
+  <ol class="steps">
+    <li>With the imported account active, open the classroom app link and click <b>Connect Wallet</b>.</li>
+    <li>MetaMask asks which account to share — pick the imported one → <b>Next</b> → <b>Connect</b>.</li>
+    <li>You'll likely see an <b>"unverified network"</b> or <b>"review alert"</b> warning next. This is expected: chain ID <code>31337</code> isn't a public, "verified" network, and the app's URL is a randomly-named Cloudflare tunnel, so MetaMask can't check either one against its known-safe list. Expand/review the alert and click through it (<b>Connect anyway</b>) — safe here per the <a href="#safety">Real vs. fake</a> box above.</li>
+    <li>A network add/switch prompt follows (adding "PropChain Classroom") → <b>Approve</b> → <b>Switch.</b></li>
+    <li>Back in the app, confirm the status line shows you're connected at chain <code>31337</code>.</li>
+    <li>Scroll to <b>"02 · PRIMARY MARKET — Buy fractional tokens,"</b> pick a property, enter a whole-number quantity, and click <b>"Approve &amp; buy tokens."</b></li>
+    <li>Confirm the two MetaMask popups that follow (an <code>approve</code>, then the actual purchase). The <b>Live Teaching Console</b> at the top of the app narrates each step as it happens — clicked, signed, submitted, mined, confirmed, balances updated.</li>
+  </ol>
+  <div class="callout">If step 7 never shows a MetaMask popup at all and the app reports <code>could not coalesce error</code> or MetaMask reports error code <code>4100</code> ("account and/or method has not been authorized"), see <a href="#troubleshooting">Troubleshooting</a> below — this was a real MetaMask bug this guide's own test run hit, and the app has since been patched to work around it automatically.</div>
+</section>
+
+<section class="block" id="verify">
+  <span class="eyebrow">5 · Verify</span>
+  <h2>See the balance inside MetaMask itself, not just the app</h2>
+  <p class="sub">The app tracks your token balances on its own, but MetaMask won't display a custom token until you add it manually — it has no way to discover tokens on a private, unverified network by itself.</p>
+  <ol class="steps">
+    <li>Make sure MetaMask is on the <b>PropChain Classroom</b> network with your imported account active.</li>
+    <li>Open the <b>Tokens</b> tab in MetaMask → <b>Import tokens</b> (older versions call this <b>Manage tokens</b>).</li>
+    <li>Switch to <b>Custom token</b> and paste the property token's contract address — the app's <code>deployment.json</code> lists one per property (e.g. Dallas Garden Apartments / <code>DGA</code>).</li>
+    <li>Symbol and decimals (18) should auto-fill. Click <b>Import.</b></li>
+  </ol>
+  <div class="callout">A quick sanity check worth doing once: buy 10 tokens, check the balance shows 10 in MetaMask; buy 10 more, confirm it reads 20. If the app's own balance and MetaMask's imported-token balance ever disagree, trust MetaMask's (the app re-reads from the chain on refresh, so a stale app view usually just means the page needs a reload).</div>
+</section>
+
+<section class="block" id="whats-new">
+  <span class="eyebrow">Reference</span>
+  <h2>What changed in the app to make remote testing possible</h2>
+  <div class="grid3">
+    <div class="card">
+      <h4>Student Quickstart panel</h4>
+      <p>All 10 Hardhat test accounts, with one-click "copy private key" buttons, right in the app — a remote student never needs to see the instructor's terminal output.</p>
+    </div>
+    <div class="card">
+      <h4><code>?rpc=</code> link override</h4>
+      <p>The frontend and the Hardhat RPC node get two <em>independent</em> Cloudflare tunnel hostnames when testing remotely — not "same host, different port" like a LAN. The instructor's panel builds one shareable link that carries both.</p>
+    </div>
+    <div class="card">
+      <h4>Token ownership map</h4>
+      <p>A live, area-proportional bubble chart of who holds what, built from real on-chain <code>Transfer</code> events — the same technique a real block explorer uses, not a hardcoded guest list.</p>
+    </div>
+    <div class="card">
+      <h4>One-script start/stop</h4>
+      <p><code>startPropChain.bat</code> / <code>.sh</code> (<code>--tunnel</code> flag) brings up the node, deploys, starts the frontend, and opens both Cloudflare tunnels in one command — printing the exact shareable student link at the end. <code>stopPropChain.bat</code> / <code>.sh</code> tears it all down.</p>
+    </div>
+    <div class="card">
+      <h4>Automatic permission re-grant</h4>
+      <p><code>ensureNetwork()</code> now re-requests account permission once, right after adding the custom network, working around a real MetaMask regression (see <a href="#troubleshooting">Troubleshooting</a>) that used to silently block every transaction.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="troubleshooting">
+  <span class="eyebrow">Troubleshooting</span>
+  <h2>Problems this guide's own test run actually hit</h2>
+
+  <h3 style="font-size:15px;margin:18px 0 6px">"Connect Wallet" does nothing</h3>
+  <p class="sub">Almost always means MetaMask isn't installed <em>in this specific browser</em> yet (a different browser on the same computer doesn't count). Install it per <a href="#install">step 1</a>, then reload the page.</p>
+
+  <h3 style="font-size:15px;margin:18px 0 6px">No "Import account" option anywhere</h3>
+  <p class="sub">Newer multichain MetaMask builds renamed this flow — use <b>account selector → "Add wallet" → "Import an account"</b> exactly as in <a href="#import">step 3</a>, not "Add account" (which just creates another blank account) and not an individual account's "Account details" screen (which is for exporting <em>that</em> account's own key, not importing a new one).</p>
+
+  <h3 style="font-size:15px;margin:18px 0 6px">Clicking buy shows nothing, then <code>could not coalesce error</code> / MetaMask code 4100</h3>
+  <p class="sub">This is a real MetaMask regression (v13.55+): adding a custom network via <code>wallet_addEthereumChain</code> doesn't always re-scope an already-connected account to that new chain. <code>eth_accounts</code> still reports the account correctly, but <code>eth_sendTransaction</code> silently gets rejected — no popup appears at all, because MetaMask refuses before it ever shows one.</p>
+  <p class="sub"><b>This is now fixed automatically</b> in the app (<code>ensureNetwork()</code> re-requests account permission once after the network is added). If you're on an older cached version of the page, or still see this, run the fix manually once in the browser DevTools console (F12 → Console) while the app tab is open:</p>
+  <pre><code>await window.ethereum.request({method:'wallet_requestPermissions', params:[{eth_accounts:{}}]})</code></pre>
+  <p class="sub">Approve the popup it shows, then retry the action.</p>
+
+  <h3 style="font-size:15px;margin:18px 0 6px">"Review alert" / "Continue at your own risk" warnings</h3>
+  <p class="sub">Expected every time, not a sign of an actual problem — MetaMask can't verify an unrecognized chain ID (<code>31337</code>) paired with a randomly-named tunnel domain against its known-safe list, so it flags the combination generically. Safe to proceed given the account in use is a disposable Hardhat test key (see <a href="#safety">Real vs. fake</a>).</p>
+</section>
+
+</main>
+</div>
+
+<footer>PROPCHAIN CLASSROOM · METAMASK SETUP GUIDE · LOCAL TEST NETWORK ONLY · NEVER CONNECT A REAL WALLET TO THIS APP</footer>
+</body>
+</html>
